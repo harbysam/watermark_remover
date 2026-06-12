@@ -1,18 +1,15 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}WM Remover — Local Watermark Tool{% endblock %}
-
 {% block content %}
 <div class="row justify-content-center mb-4">
     <div class="col-lg-10 text-center">
         <div class="hero-icon mb-3">
             <i class="bi bi-eraser-fill"></i>
         </div>
-        <h1 class="h2 fw-bold mb-2">Watermark Remover</h1>
-        <p class="text-muted mb-0">
-            Watermark uzerine firca ile ciz, uygula, sonucu kontrol et ve indir.
-            Cikti orijinal formatinda, maksimum kalitede.
+        <h1 class="h2 fw-bold mb-2" data-i18n="heroTitle">Watermark Remover</h1>
+        <p class="text-muted mb-0" data-i18n="heroDesc">
+            Brush over the watermark, apply, preview the result, then download. Original format, maximum quality.
         </p>
     </div>
 </div>
@@ -24,29 +21,35 @@
                 <div class="row g-3 align-items-center">
                     <div class="col-12 col-lg-auto">
                         <label for="fileInput" class="btn btn-primary">
-                            <i class="bi bi-image me-1"></i> Fotograf Sec
+                            <i class="bi bi-image me-1"></i>
+                            <span data-i18n="selectPhoto">Select Photo</span>
                         </label>
                         <input type="file" id="fileInput" accept="image/*" class="d-none">
                     </div>
                     <div class="col-12 col-lg">
                         <label for="brushSize" class="form-label small text-muted mb-1">
-                            Firca boyutu: <span id="brushValue" class="fw-semibold text-body">24</span> px
+                            <span data-i18n="brushSize">Brush size:</span>
+                            <span id="brushValue" class="fw-semibold text-body">24</span> px
                         </label>
                         <input type="range" class="form-range brush-range" id="brushSize" min="8" max="80" value="24">
                     </div>
                     <div class="col-12 col-lg-auto">
                         <div class="d-flex flex-wrap gap-2">
                             <button type="button" class="btn btn-outline-secondary btn-sm" id="undoBtn" disabled>
-                                <i class="bi bi-arrow-counterclockwise me-1"></i> Geri Al
+                                <i class="bi bi-arrow-counterclockwise me-1"></i>
+                                <span data-i18n="undo">Undo</span>
                             </button>
                             <button type="button" class="btn btn-outline-secondary btn-sm" id="clearBtn" disabled>
-                                <i class="bi bi-x-circle me-1"></i> Maskeyi Sil
+                                <i class="bi bi-x-circle me-1"></i>
+                                <span data-i18n="clearMask">Clear Mask</span>
                             </button>
                             <button type="button" class="btn btn-primary btn-sm" id="applyBtn" disabled>
-                                <i class="bi bi-magic me-1"></i> Uygula
+                                <i class="bi bi-magic me-1"></i>
+                                <span data-i18n="apply">Apply</span>
                             </button>
                             <button type="button" class="btn btn-success btn-sm" id="downloadBtn" disabled>
-                                <i class="bi bi-download me-1"></i> Indir
+                                <i class="bi bi-download me-1"></i>
+                                <span data-i18n="download">Download</span>
                             </button>
                         </div>
                     </div>
@@ -64,14 +67,15 @@
         <div class="card shadow-sm border-0 h-100">
             <div class="card-header bg-body py-3">
                 <h2 class="h6 mb-0 fw-semibold">
-                    <i class="bi bi-pencil-square text-primary me-2"></i>Orijinal
+                    <i class="bi bi-pencil-square text-primary me-2"></i>
+                    <span data-i18n="original">Original</span>
                 </h2>
             </div>
             <div class="card-body p-2 p-md-3">
                 <div id="canvasPanel" class="canvas-panel canvas-panel--empty text-center p-4">
                     <div id="emptyState" class="text-muted">
                         <i class="bi bi-cloud-upload display-6 d-block mb-2 opacity-50"></i>
-                        <p class="mb-0">Baslamak icin bir fotograf sec.</p>
+                        <p class="mb-0" data-i18n="emptyState">Select a photo to get started.</p>
                     </div>
                     <div class="canvas-viewport d-none" id="canvasWrap">
                         <canvas id="canvas"></canvas>
@@ -80,7 +84,7 @@
                 </div>
                 <p class="small text-muted mt-3 mb-0">
                     <i class="bi bi-info-circle me-1"></i>
-                    Kirmizi alanlar silinecek. Brush disindaki piksellere dokunulmaz.
+                    <span data-i18n="hint">Red areas will be removed. Pixels outside the brush stay untouched.</span>
                 </p>
             </div>
         </div>
@@ -90,13 +94,14 @@
         <div class="card shadow-sm border-0 border-success border-2">
             <div class="card-header bg-body py-3">
                 <h2 class="h6 mb-0 fw-semibold text-success">
-                    <i class="bi bi-check2-circle me-2"></i>Sonuc
+                    <i class="bi bi-check2-circle me-2"></i>
+                    <span data-i18n="result">Result</span>
                 </h2>
             </div>
             <div class="card-body p-2 p-md-3">
                 <div class="canvas-panel text-center p-2">
                     <div class="canvas-viewport">
-                        <img id="resultPreview" alt="Islenmis gorsel" class="img-fluid rounded">
+                        <img id="resultPreview" data-i18n-alt="resultAlt" alt="Processed image" class="img-fluid rounded">
                     </div>
                 </div>
             </div>

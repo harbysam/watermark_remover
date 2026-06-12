@@ -19,6 +19,10 @@ const fileNameBadge = document.getElementById('fileNameBadge');
 
 const MAX_HISTORY = 40;
 
+function t(key, vars = {}) {
+    return window.wmI18n ? window.wmI18n.t(key, vars) : key;
+}
+
 let image = new Image();
 let originalFile = null;
 let drawing = false;
@@ -44,7 +48,7 @@ function clearResult() {
 function invalidateResult() {
     if (!resultBlob) return;
     clearResult();
-    setStatus('Maske degisti. Tekrar uygula.', 'warning');
+    setStatus(t('statusMaskChanged'), 'warning');
 }
 
 function saveMaskState() {
@@ -200,7 +204,7 @@ function resolveFilename(response) {
 async function applyProcessing() {
     if (!originalFile) return;
 
-    setStatus('Isleniyor, lutfen bekleyin...', 'info');
+    setStatus(t('statusProcessing'), 'info');
     applyBtn.disabled = true;
     downloadBtn.disabled = true;
 
@@ -221,7 +225,7 @@ async function applyProcessing() {
 
         if (!response.ok) {
             const text = await response.text();
-            throw new Error(text || 'Islem basarisiz.');
+            throw new Error(text || t('statusFailed'));
         }
 
         const blob = await response.blob();
@@ -235,7 +239,7 @@ async function applyProcessing() {
         resultPreview.src = resultUrl;
         resultSection.classList.remove('d-none');
         downloadBtn.disabled = false;
-        setStatus(`Hazir (${sizeMb} MB). Sonucu kontrol et, memnunsan indir.`, 'success');
+        setStatus(t('statusReady', { size: sizeMb }), 'success');
         resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
     } catch (error) {
         setStatus(error.message, 'danger');
@@ -252,7 +256,7 @@ function downloadResult() {
     link.download = resultFilename;
     link.click();
     URL.revokeObjectURL(url);
-    setStatus(`Indirildi: ${resultFilename}`, 'success');
+    setStatus(t('statusDownloaded', { name: resultFilename }), 'success');
 }
 
 fileInput.addEventListener('change', (event) => {
@@ -270,7 +274,7 @@ fileInput.addEventListener('change', (event) => {
         clearBtn.disabled = false;
         applyBtn.disabled = false;
         const sizeMb = (file.size / (1024 * 1024)).toFixed(1);
-        setStatus(`Yuklendi: ${file.name} (${sizeMb} MB)`, 'success');
+        setStatus(t('statusLoaded', { name: file.name, size: sizeMb }), 'success');
     };
     image.src = URL.createObjectURL(file);
 });

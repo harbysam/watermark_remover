@@ -50,7 +50,20 @@ def _patch_fill_from_border(image: np.ndarray, mask: np.ndarray, ring: np.ndarra
     rng = _rng_from_image(image, mask)
     picks = rng.integers(0, len(border_y), size=len(mask_y))
     result[mask_y, mask_x] = image[border_y[picks], border_x[picks]]
+    # Rastgele piksel kopyalama benek yapar; hafif blur ile yumusat
+    blurred = cv2.GaussianBlur(result, (5, 5), 0)
+    result[mask_y, mask_x] = blurred[mask_y, mask_x]
     return result
+
+
+def _grain_residual_std(image: np.ndarray, ring: np.ndarray) -> np.ndarray:
+    """Gradyani degil gercek grain'i olc: blur'dan sapma (yuksek frekans)."""
+    blurred = cv2.GaussianBlur(image, (5, 5), 0)
+    residual = image.astype(np.float64) - blurred.astype(np.float64)
+    vals = residual[ring > 0]
+    if len(vals) == 0:
+        return np.zeros(3)
+    return np.std(vals, axis=0)
 
 
 def _match_border_noise(
@@ -59,25 +72,74 @@ def _match_border_noise(
     mask: np.ndarray,
     ring: np.ndarray,
 ) -> np.ndarray:
-    ring_pixels = source[ring > 0].astype(np.float64)
-    if len(ring_pixels) == 0:
+    std = _grain_residual_std(source, ring)
+    grain = float(np.mean(std))
+
+    # Duz/temiz arka plan: noise ekleme, renkli benek olusturur
+    if grain < 1.2:
         return filled
 
-    std = np.maximum(np.std(ring_pixels, axis=0), 0.5)
     result = filled.astype(np.float64)
     mask_idx = mask > 0
-    ys, xs = np.where(mask_idx)
+    n = int(np.count_nonzero(mask_idx))
     rng = _rng_from_image(source, mask)
-    noise = rng.normal(0, 1, size=(len(ys), 3)) * std
-    result[mask_idx] = np.clip(result[mask_idx] + noise * 0.9, 0, 255)
+
+    # Luma agirlikli noise: 3 kanala ayni deger -> renkli benek yok
+    luma = rng.normal(0, 1, size=(n, 1)) * grain
+    chroma = rng.normal(0, 1, size=(n, 3)) * (std * 0.2)
+    result[mask_idx] = np.clip(result[mask_idx] + luma * 0.8 + chroma, 0, 255)
     return result.astype(np.uint8)
 
 
-def _texture_score(image: np.ndarray, ring: np.ndarray) -> float:
-    ring_pixels = image[ring > 0].astype(np.float64)
-    if len(ring_pixels) == 0:
-        return 0.0
-    return float(np.mean(np.std(ring_pixels, axis=0)))
+def _shiftmap_inpaint(image: np.ndarray, mask: np.ndarray) -> np.ndarray | None:
+    """Patch tabanli ShiftMap inpaint: fotonun icinden gercek yamalar kopyalar.
+
+    Hiz icin sadece mask cevresindeki ROI islenir.
+    """
+    if not hasattr(cv2, 'xphoto'):
+        return None
+
+    ys, xs = np.where(mask > 0)
+    if len(ys) == 0:
+        return None
+
+    # Yama aranacak cevre: mask boyutuna gore genis tut
+    span = max(int(ys.max() - ys.min()), int(xs.max() - xs.min()))
+    pad = max(120, span * 2)
+    y0 = max(0, int(ys.min()) - pad)
+    y1 = min(image.shape[0], int(ys.max()) + pad + 1)
+    x0 = max(0, int(xs.min()) - pad)
+    x1 = min(image.shape[1], int(xs.max()) + pad + 1)
+
+    roi = image[y0:y1, x0:x1].copy()
+    roi_mask = mask[y0:y1, x0:x1]
+    # xphoto.inpaint: sifir olmayan pikseller GECERLI, sifir olanlar doldurulur
+    valid = np.where(roi_mask > 0, 0, 255).astype(np.uint8)
+
+    dst = np.zeros_like(roi)
+    try:
+        cv2.xphoto.inpaint(roi, valid, dst, cv2.xphoto.INPAINT_SHIFTMAP)
+    except cv2.error:
+        return None
+
+    result = image.copy()
+    result[y0:y1, x0:x1] = dst
+    return result
+
+
+def _hybrid_inpaint(original: np.ndarray, mask: np.ndarray, ring: np.ndarray) -> np.ndarray:
+    grain = float(np.mean(_grain_residual_std(original, ring)))
+
+    inpaint_ns = cv2.inpaint(original, mask, inpaintRadius=8, flags=cv2.INPAINT_NS)
+    inpaint_telea = cv2.inpaint(original, mask, inpaintRadius=5, flags=cv2.INPAINT_TELEA)
+
+    if grain >= 2.5:
+        patch_fill = _patch_fill_from_border(original, mask, ring)
+        filled = cv2.addWeighted(patch_fill, 0.5, inpaint_ns, 0.5, 0)
+    else:
+        filled = cv2.addWeighted(inpaint_ns, 0.6, inpaint_telea, 0.4, 0)
+
+    return _match_border_noise(original, filled, mask, ring)
 
 
 def remove_watermark(image_bytes: bytes, mask_bytes: bytes) -> np.ndarray:
@@ -91,21 +153,10 @@ def remove_watermark(image_bytes: bytes, mask_bytes: bytes) -> np.ndarray:
     # Yari saydam watermark kenarlarini da kapsa
     mask = cv2.dilate(mask, kernel, iterations=4)
 
-    ring = _border_ring(mask, outer_iter=5)
-    texture = _texture_score(original, ring)
-
-    inpaint_ns = cv2.inpaint(original, mask, inpaintRadius=8, flags=cv2.INPAINT_NS)
-    inpaint_telea = cv2.inpaint(original, mask, inpaintRadius=5, flags=cv2.INPAINT_TELEA)
-    patch_fill = _patch_fill_from_border(original, mask, ring)
-
-    if texture >= 6:
-        # Grain/doku var: border'dan patch + hafif inpaint
-        filled = cv2.addWeighted(patch_fill, 0.65, inpaint_ns, 0.35, 0)
-    else:
-        # Duz alan: inpaint agirlikli
-        filled = cv2.addWeighted(inpaint_ns, 0.6, inpaint_telea, 0.4, 0)
-
-    filled = _match_border_noise(original, filled, mask, ring)
+    filled = _shiftmap_inpaint(original, mask)
+    if filled is None:
+        ring = _border_ring(mask, outer_iter=5)
+        filled = _hybrid_inpaint(original, mask, ring)
 
     result = original.copy()
     result[mask > 0] = filled[mask > 0]
