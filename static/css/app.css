@@ -1,0 +1,128 @@
+.canvas-viewport {
+    position: relative;
+    display: inline-block;
+    line-height: 0;
+    max-width: 100%;
+}
+
+#canvas,
+#resultPreview {
+    display: block;
+    max-width: 100%;
+    height: auto;
+}
+
+#canvas {
+    cursor: none;
+}
+
+.brush-cursor {
+    position: absolute;
+    border: 2px solid var(--bs-danger);
+    border-radius: 50%;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    display: none;
+    box-sizing: border-box;
+    background: rgba(var(--bs-danger-rgb), 0.12);
+}
+
+.canvas-panel {
+    max-height: 70vh;
+    overflow: auto;
+    background: var(--bs-secondary-bg);
+    border-radius: var(--bs-border-radius);
+    border: 1px solid var(--bs-border-color);
+}
+
+.canvas-panel--empty {
+    min-height: 280px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.hero-icon {
+    width: 3rem;
+    height: 3rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.75rem;
+    background: rgba(var(--bs-primary-rgb), 0.1);
+    color: var(--bs-primary);
+    font-size: 1.5rem;
+}
+
+.brush-range {
+    width: 140px;
+}
+
+@media (max-width: 991.98px) {
+    .brush-range {
+        width: 100%;
+    }
+}
+
+[data-bs-theme="dark"] {
+    color-scheme: dark;
+    --bs-body-bg: #0a0a0a;
+    --bs-body-color: #e4e4e4;
+    --bs-body-bg-rgb: 10, 10, 10;
+    --bs-emphasis-color: #ffffff;
+    --bs-secondary-color: rgba(228, 228, 228, 0.6);
+    --bs-secondary-bg: #141414;
+    --bs-tertiary-bg: #050505;
+    --bs-border-color: #262626;
+    --bs-border-color-translucent: rgba(255, 255, 255, 0.06);
+}
+
+[data-bs-theme="dark"] body {
+    background-color: #050505 !important;
+}
+
+[data-bs-theme="dark"] .navbar,
+[data-bs-theme="dark"] footer {
+    background-color: #0a0a0a !important;
+    border-color: #222 !important;
+}
+
+[data-bs-theme="dark"] .card {
+    background-color: #101010;
+    border-color: #222 !important;
+}
+
+[data-bs-theme="dark"] .card-header {
+    background-color: #0d0d0d !important;
+    border-bottom-color: #222 !important;
+}
+
+[data-bs-theme="dark"] .canvas-panel {
+    background: #000;
+    border-color: #333;
+}
+
+[data-bs-theme="dark"] .text-muted {
+    color: #888 !important;
+}
+
+[data-bs-theme="dark"] .badge.text-bg-secondary {
+    background-color: #1a1a1a !important;
+    color: #aaa !important;
+}
+
+[data-bs-theme="dark"] .btn-outline-secondary {
+    --bs-btn-color: #bbb;
+    --bs-btn-border-color: #333;
+    --bs-btn-hover-bg: #1a1a1a;
+    --bs-btn-hover-border-color: #444;
+    --bs-btn-hover-color: #fff;
+}
+
+[data-bs-theme="dark"] .shadow-sm {
+    box-shadow: 0 0.125rem 0.75rem rgba(0, 0, 0, 0.6) !important;
+}
+
+[data-bs-theme="dark"] .hero-icon {
+    background: rgba(var(--bs-primary-rgb), 0.15);
+}

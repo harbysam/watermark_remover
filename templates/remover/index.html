@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}WM Remover — Local Watermark Tool{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mb-4">
+    <div class="col-lg-10 text-center">
+        <div class="hero-icon mb-3">
+            <i class="bi bi-eraser-fill"></i>
+        </div>
+        <h1 class="h2 fw-bold mb-2">Watermark Remover</h1>
+        <p class="text-muted mb-0">
+            Watermark uzerine firca ile ciz, uygula, sonucu kontrol et ve indir.
+            Cikti orijinal formatinda, maksimum kalitede.
+        </p>
+    </div>
+</div>
+
+<div class="row justify-content-center mb-4">
+    <div class="col-lg-10">
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-3 p-md-4">
+                <div class="row g-3 align-items-center">
+                    <div class="col-12 col-lg-auto">
+                        <label for="fileInput" class="btn btn-primary">
+                            <i class="bi bi-image me-1"></i> Fotograf Sec
+                        </label>
+                        <input type="file" id="fileInput" accept="image/*" class="d-none">
+                    </div>
+                    <div class="col-12 col-lg">
+                        <label for="brushSize" class="form-label small text-muted mb-1">
+                            Firca boyutu: <span id="brushValue" class="fw-semibold text-body">24</span> px
+                        </label>
+                        <input type="range" class="form-range brush-range" id="brushSize" min="8" max="80" value="24">
+                    </div>
+                    <div class="col-12 col-lg-auto">
+                        <div class="d-flex flex-wrap gap-2">
+                            <button type="button" class="btn btn-outline-secondary btn-sm" id="undoBtn" disabled>
+                                <i class="bi bi-arrow-counterclockwise me-1"></i> Geri Al
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm" id="clearBtn" disabled>
+                                <i class="bi bi-x-circle me-1"></i> Maskeyi Sil
+                            </button>
+                            <button type="button" class="btn btn-primary btn-sm" id="applyBtn" disabled>
+                                <i class="bi bi-magic me-1"></i> Uygula
+                            </button>
+                            <button type="button" class="btn btn-success btn-sm" id="downloadBtn" disabled>
+                                <i class="bi bi-download me-1"></i> Indir
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <span id="fileNameBadge" class="badge text-bg-secondary d-none"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row justify-content-center g-4">
+    <div class="col-lg-10">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-body py-3">
+                <h2 class="h6 mb-0 fw-semibold">
+                    <i class="bi bi-pencil-square text-primary me-2"></i>Orijinal
+                </h2>
+            </div>
+            <div class="card-body p-2 p-md-3">
+                <div id="canvasPanel" class="canvas-panel canvas-panel--empty text-center p-4">
+                    <div id="emptyState" class="text-muted">
+                        <i class="bi bi-cloud-upload display-6 d-block mb-2 opacity-50"></i>
+                        <p class="mb-0">Baslamak icin bir fotograf sec.</p>
+                    </div>
+                    <div class="canvas-viewport d-none" id="canvasWrap">
+                        <canvas id="canvas"></canvas>
+                        <div id="brushCursor" class="brush-cursor"></div>
+                    </div>
+                </div>
+                <p class="small text-muted mt-3 mb-0">
+                    <i class="bi bi-info-circle me-1"></i>
+                    Kirmizi alanlar silinecek. Brush disindaki piksellere dokunulmaz.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-10 d-none" id="resultSection">
+        <div class="card shadow-sm border-0 border-success border-2">
+            <div class="card-header bg-body py-3">
+                <h2 class="h6 mb-0 fw-semibold text-success">
+                    <i class="bi bi-check2-circle me-2"></i>Sonuc
+                </h2>
+            </div>
+            <div class="card-body p-2 p-md-3">
+                <div class="canvas-panel text-center p-2">
+                    <div class="canvas-viewport">
+                        <img id="resultPreview" alt="Islenmis gorsel" class="img-fluid rounded">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row justify-content-center mt-4">
+    <div class="col-lg-10">
+        <div id="status" class="alert alert-info d-none mb-0" role="alert"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/app.js' %}"></script>
+{% endblock %}
