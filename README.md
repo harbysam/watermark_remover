@@ -43,7 +43,7 @@ Unbrushed pixels stay **unchanged**. Output keeps the **original format** (JPEG 
 ### Quick start
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/wm_remover.git
+git clone https://github.com/harbysam/wm_remover.git
 cd wm_remover
 
 python -m venv venv
@@ -117,7 +117,7 @@ Fırça dışı piksellere **dokunulmaz**. Çıktı **orijinal formatta** gelir 
 ### Kurulum
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/wm_remover.git
+git clone https://github.com/harbysam/wm_remover.git
 cd wm_remover
 
 python -m venv venv
@@ -170,4 +170,5 @@ wm_remover/
 
 ## License | Lisans
 
-MIT (publish öncesi lisansını ekle / add your license before publishing)
+MIT — see [LICENSE](LICENSE) for details.  
+MIT — ayrıntılar için [LICENSE](LICENSE) dosyasına bakın.
